@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,10 +10,13 @@ import (
 type OrderStatus string
 
 const (
-	OrderStatus_New      OrderStatus = "New"
-	OrderStatus_Complete OrderStatus = "Complete"
-	OrderStatus_Rejected OrderStatus = "Rejected"
+	OrderStatus_New               OrderStatus = "New"
+	OrderStatus_Completed         OrderStatus = "Completed"
+	OrderStatus_Rejected          OrderStatus = "Rejected"
+	OrderStatus_ReversalRequested OrderStatus = "ReversalRequested"
+	OrderStatus_Reversed          OrderStatus = "Reversed"
 )
+
 const timeFormat = "2006-01-02 15:04:05.000"
 
 type Order struct {
@@ -39,5 +43,17 @@ func NewOrder(item Item) Order {
 }
 
 func (o *Order) Complete() {
-	o.Status = OrderStatus_Complete
+	if o.Status == OrderStatus_ReversalRequested {
+		o.Status = OrderStatus_Reversed
+		return
+	}
+	o.Status = OrderStatus_Completed
+}
+
+func (o *Order) RequestReverse() error {
+	if o.Status == OrderStatus_Completed {
+		o.Status = OrderStatus_ReversalRequested
+		return nil
+	}
+	return fmt.Errorf("only completed orders can be reversed")
 }
