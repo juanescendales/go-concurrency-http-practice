@@ -2,15 +2,20 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+
+	"github.com/juanescendales/go-concurrency-http-practice/handlers"
 )
 
 func main() {
-	http.HandleFunc("/hello", Hello)
-	fmt.Println("Listening on port 8080...")
-	http.ListenAndServe(":8080", nil)
-}
-
-func Hello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello world!")
+	fmt.Println("Welcome to the Orders App!")
+	handler, err := handlers.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// start server
+	router := handlers.ConfigureHandler(handler)
+	fmt.Println("Listening on localhost:3000...")
+	log.Fatal(http.ListenAndServe(":3000", router))
 }
